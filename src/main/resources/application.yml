@@ -1,0 +1,32 @@
+# Config común a todos los perfiles
+spring:
+  application:
+    name: ms-usuarios
+  profiles:
+    default: dev
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  flyway:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+    locations: classpath:db/migration
+
+server:
+  port: 8084
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# Keycloak Admin API (service account)
+keycloak:
+  admin:
+    base-url: ${KEYCLOAK_ADMIN_BASE_URL}
+    realm: ${KEYCLOAK_REALM:moneipe-dev}
+    client-id: ${KEYCLOAK_CLIENT_ID}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET}
