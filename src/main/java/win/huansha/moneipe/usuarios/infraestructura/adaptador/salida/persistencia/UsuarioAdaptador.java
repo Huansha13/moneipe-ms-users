@@ -41,7 +41,13 @@ public class UsuarioAdaptador implements UsuarioRepositorio {
 
     @Override
     public Flux<Usuario> listar() {
-        return repo.findAll().map(this::toDomain);
+        return repo.findAll()
+            .sort((a, b) -> {
+                if (a.getCreatedAt() == null) return 1;
+                if (b.getCreatedAt() == null) return -1;
+                return b.getCreatedAt().compareTo(a.getCreatedAt());
+            })
+            .map(this::toDomain);
     }
 
     @Override

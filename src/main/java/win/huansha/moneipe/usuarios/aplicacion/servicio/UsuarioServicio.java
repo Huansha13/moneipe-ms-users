@@ -2,6 +2,7 @@ package win.huansha.moneipe.usuarios.aplicacion.servicio;
 
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UsuarioServicio implements UsuarioCasoUso {
 
     private final UsuarioRepositorio repo;
@@ -55,6 +57,7 @@ public class UsuarioServicio implements UsuarioCasoUso {
     public Mono<Usuario> actualizar(UUID id, String nombres, String apellidos, String email) {
         return repo.porId(id)
             .flatMap(existing -> {
+                log.info("Actualizando usuario con ID: {}", id);
                 Usuario actualizado = Usuario.builder()
                     .id(existing.getId())
                     .username(existing.getUsername())
@@ -68,7 +71,22 @@ public class UsuarioServicio implements UsuarioCasoUso {
                     .updatedBy(existing.getUpdatedBy())
                     .build();
                 return repo.guardar(actualizado);
-            });
+            })
+            .switchIfEmpty(Mono.defer(() -> {
+                String username = (email != null && email.contains("@"))
+                    ? email.substring(0, email.indexOf('@'))
+                    : id.toString();
+                Usuario nuevo = Usuario.builder()
+                    .id(id)
+                    .username(username)
+                    .nombres(nombres)
+                    .apellidos(apellidos)
+                    .email(email)
+                    .activo(true)
+                    .updatedAt(Instant.now())
+                    .build();
+                return repo.guardar(nuevo);
+            }));
     }
 
     @Override
