@@ -73,6 +73,7 @@ public class UsuarioServicio implements UsuarioCasoUso {
                 return repo.guardar(actualizado);
             })
             .switchIfEmpty(Mono.defer(() -> {
+                log.info("Usuario con ID: {} no encontrado. Creando nuevo usuario.", id);
                 String username = (email != null && email.contains("@"))
                     ? email.substring(0, email.indexOf('@'))
                     : id.toString();
